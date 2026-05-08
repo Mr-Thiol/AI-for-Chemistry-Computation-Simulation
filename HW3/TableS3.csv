@@ -1,0 +1,27 @@
+﻿,"respectively.  The  notation,  ‘All’,  represents  that  these  SDs  do  not  distinguish  the  surrounding",,,,,,
+No.,rc,nb,n,No.,rc,nb,n
+1,1.9,H,8,25,4.0,H,8
+2,2.3,H,2,26,5.0,H,8
+3,2.8,H,4,27,6.0,H,8
+4,2.6,Ti,8,28,2.6,Ti,2
+5,3.0,Ti,2,29,3.0,Ti,2
+6,3.6,Ti,4,30,4.0,Ti,2
+7,2.0,O,8,31,5.5,Ti,2
+8,2.4,O,2,32,7.0,Ti,2
+9,2.8,O,4,33,2.5,Ti,8
+10,2.6,All,-3,34,3.0,Ti,8
+11,3.5,All,-3,35,4.0,Ti,8
+12,4.5,All,-3,36,5.5,Ti,8
+13,2.6,All,2,37,7.0,Ti,8
+14,3.2,All,2,38,2.2,O,2
+15,4.0,All,2,39,3.0,O,2
+16,5.0,All,2,40,4.0,O,2
+17,7.0,All,2,41,5.5,O,2
+18,2.2,H,2,42,7.0,O,2
+19,3.0,H,2,43,2.2,O,8
+20,4.0,H,2,44,3.0,O,8
+21,5.0,H,2,45,4.0,O,8
+22,6.0,H,2,46,5.5,O,8
+23,2.0,H,8,47,7.0,O,8
+24,3.0,H,8,,,,
+Table  S4.  Parameters  of  the  structural  descriptors  S2 (see  Eq.  S7)  used  to  describe  the  atomic,,,,,,,
