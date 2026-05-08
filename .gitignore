@@ -1,3 +1,6 @@
 /HW_For_Submit
 # .gitignore
 *.xyz
+*.cif
+*.log
+*.out
