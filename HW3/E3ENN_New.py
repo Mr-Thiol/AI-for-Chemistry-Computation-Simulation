@@ -64,7 +64,7 @@ def main():
     print(f"l=2 (张量): {np.round(node_feature[4:9], 4)}")
 
     # ==========================================
-    # 5. 高清学术可视化
+    # 5. 高清学术可视化 (已优化布局与顶头问题)
     # ==========================================
     fig, ax = plt.subplots(figsize=(10, 5))
     
@@ -79,19 +79,27 @@ def main():
     # 绘制柱状图
     ax.bar(dims, node_feature, color='#2c3e50', width=0.6, zorder=2)
     
-    # 添加区域顶部文字
-    y_text_pos = np.max(np.abs(node_feature)) * 5  # 放在对数坐标较高的位置
-    ax.text(0, y_text_pos, "l=0 (Scalar)\n1 dim", ha='center', va='top', fontweight='bold', color='#4a4a4a')
-    ax.text(2, y_text_pos, "l=1 (Vector)\n3 dims", ha='center', va='top', fontweight='bold', color='#4a4a4a')
-    ax.text(6, y_text_pos, "l=2 (Tensor)\n5 dims", ha='center', va='top', fontweight='bold', color='#4a4a4a')
+    # 启用 SymLog (对数/线性对称轴) 
+    ax.set_yscale('symlog', linthresh=1e-4)
+
+    # 【核心修复】：动态计算并显式设置 Y 轴的上下限，给文字和最高柱子留出充足空间
+    max_abs_val = np.max(np.abs(node_feature))
+    
+    # 在对数坐标下，* 100 意味着向上多留出两个数量级的留白空间
+    ymin = -max_abs_val * 2
+    ymax = max_abs_val * 200 
+    ax.set_ylim(ymin, ymax)
+    
+    # 添加区域顶部文字 (将 va 改为 'bottom' 且位置适中，避免与柱子重叠)
+    y_text_pos = max_abs_val * 5
+    ax.text(0, y_text_pos, "l=0 (Scalar)\n1 dim", ha='center', va='bottom', fontweight='bold', color='#4a4a4a')
+    ax.text(2, y_text_pos, "l=1 (Vector)\n3 dims", ha='center', va='bottom', fontweight='bold', color='#4a4a4a')
+    ax.text(6, y_text_pos, "l=2 (Tensor)\n5 dims", ha='center', va='bottom', fontweight='bold', color='#4a4a4a')
 
     # 添加白色分割线
     ax.axvline(x=0.5, color='white', linewidth=1.5, zorder=1)
     ax.axvline(x=3.5, color='white', linewidth=1.5, zorder=1)
 
-    # 启用 SymLog (对数/线性对称轴) 
-    ax.set_yscale('symlog', linthresh=1e-4)
-    
     # 设置美观的标签和标题
     ax.set_xlim(-0.5, 8.5)
     
@@ -102,15 +110,15 @@ def main():
     
     ax.set_title("E(3)-Equivariant Features (Spherical Harmonics) for Ti Atom", fontsize=14, fontweight='bold', pad=15)
     ax.set_ylabel("Feature Response (Symlog Scale)", fontsize=12)
-    ax.set_xlabel("Spherical Harmonic Degree ($m$)", fontsize=12)
+    ax.set_xlabel("Spherical Harmonic Degree (m)", fontsize=12)
     
     ax.grid(axis='y', linestyle='--', alpha=0.4, zorder=0)
     
     # 调整并保存
-    save_filename = 'Ti_E3_Features_Original.png'
+    save_filename = 'Ti_E3_Features_Optimized.png'
     plt.tight_layout()
     plt.savefig(save_filename, dpi=300, bbox_inches='tight')
-    print(f"\n✅ 可视化图表已保存至: {os.path.abspath(save_filename)}")
+    print(f"\n✅ 可视化图表已优化并保存至: {os.path.abspath(save_filename)}")
     plt.show()
 
 if __name__ == "__main__":
