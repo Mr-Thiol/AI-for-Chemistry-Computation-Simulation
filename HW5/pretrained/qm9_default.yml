@@ -1,0 +1,58 @@
+global_setting:
+  device: cuda:0
+  nproc: 0
+  seed: 2026
+  task_mode: train
+  task_name: qm9
+
+dataset:
+  train: ./dataset/train_data_40k.pkl
+  val: ./my_b7_data/val_1.pkl
+  test: ./my_b7_data/test_1.pkl
+
+model:
+  type: diffusion
+  network: dualenc
+  hidden_dim: 128
+  num_convs: 6
+  num_convs_local: 4
+  cutoff: 6.0
+  mlp_act: relu
+  beta_schedule: sigmoid
+  beta_start: 1.e-7
+  beta_end: 9.e-3
+  num_diffusion_timesteps: 1000
+  edge_order: 3
+  edge_encoder: mlp
+  smooth_conv: false
+
+train:
+  batch_size: 64
+  val_freq: 1000
+  max_iters: 500000
+  max_grad_norm: 30000.0
+  anneal_power: 2.0
+  resume: false
+  resume_lr: 1e-3
+  resume_path: ./logs
+  optimizer:
+    type: adam
+    lr: 1.e-3
+    weight_decay: 0.0
+    beta1: 0.95
+    beta2: 0.999
+  scheduler:
+    type: plateau
+    factor: 0.6
+    patience: 10
+
+sample:
+  autocast: true
+  conf_per_iter: 128
+  guidance_scale: 10.0
+  sigma_cutoff: 0.1
+  n_steps: 1000
+  n_steps_each: 1
+  num_confs: 10
+  start_idx: 0
+  end_idx: 10000

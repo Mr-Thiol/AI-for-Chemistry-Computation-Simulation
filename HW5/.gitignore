@@ -1,0 +1,8 @@
+logs
+*.o
+*.e
+*__pycache__*
+*vscode
+*.git
+dataset
+gpu.slurm
