@@ -1,0 +1,8 @@
+potential lj
+explore_type ssw
+Run_type  15
+SSW.sswsteps 20
+SSW.printevery T
+SSW.printselect 6
+SSW.printdelay -2
+SSW.ftol 0.1

@@ -1,0 +1,14 @@
+Ntest 0
+explore_type train
+Jobname  Au
+NNepochs 1000
+Ewaldflag    0
+readScale    0 #decide read Gmin/Gmax
+OutpotFreq   200
+%block netinfo
+ Au  Au.input
+%endblock netinfo
+Histbfgs     100
+Nparabfgs    4
+Ntrain 4383
+Stepbfgs  5

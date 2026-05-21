@@ -1,0 +1,50 @@
+=================================
+LASP-ac3.7.3 "2024.12.19"
+=================================
+
+www.lasphub.com
+
+CONTENTS:
+=========
+Src         : Executable file for all editions. Source files and static libraries for INTERFACE(expert) edition.
+Libraries   : Functions and external packages that LASP might need.
+
+COMPILE:
+========
+For NN\NC\FULL version:
+The main executable file (./Src/lasp) has been compiled using Intel Compiler.
+
+For NSLV version:
+the libvasp.so library file needs to be compiled by user.
+To do so, please check ./Libraries/1.vasplib/README
+Make sure the "libvasp.so" file is placed in your $LD_LIBRARY_PATH evironment variables.
+
+For Interface version:
+setup the intel compiler, go to ./Src, then make.
+To use other function module, such as vasp, lammps etc, please follow the ./Libraries/README
+
+Run:
+====
+mpirun -np $nslots lasp
+
+if "potential external" is used, then lasp should be run in serial.
+
+
+Manual:
+=======
+The manual can be found online
+http://www.lasphub.com/#/lasp/mannual
+
+
+Guide to examples :
+===================
+There are input files of selected systems to illustrate the functions of LASP.
+The detailed explainations of these examples can be found online
+http://www.lasphub.com/#/lasp/examples
+
+
+NNlibraries:
+============
+The Neural network potential files can be downloaded online:
+http://www.lasphub.com/#/lasp/nnLibrary
+

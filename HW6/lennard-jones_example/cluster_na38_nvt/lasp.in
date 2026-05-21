@@ -1,0 +1,7 @@
+potential lj
+explore_type nvt
+MD.dt           1
+MD.ttotal       10000
+MD.nhmass       10
+MD.target_T     800
+MD.print_freq   5

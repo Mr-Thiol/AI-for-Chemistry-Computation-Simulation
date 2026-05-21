@@ -1,0 +1,5 @@
+potential lj
+explore_type ssw
+Run_type 0
+SSW.ftol 999999
+SSW.printevery T

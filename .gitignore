@@ -4,3 +4,8 @@
 *.cif
 *.log
 *.out
+*.tgz
+*.arc
+*.ckpt
+
+lasp
