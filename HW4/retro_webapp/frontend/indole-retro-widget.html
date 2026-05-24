@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retrosynthesis Widget</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/smiles-drawer@2.0.3/dist/smiles-drawer.min.js"></script>
+  <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+  <style>
+    :root {
+      --bg: #f4f7f9;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --primary: #0b7285;
+      --primary-2: #1e6091;
+      --good: #1b9e77;
+      --mid: #b58900;
+      --bad: #d9480f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at 15% 10%, #d7f0f6, transparent 45%),
+                  radial-gradient(circle at 85% 0%, #dce6f9, transparent 40%),
+                  var(--bg);
+      color: var(--ink);
+    }
+    .wrap {
+      max-width: 1220px;
+      margin: 24px auto;
+      padding: 0 16px 30px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0b7285, #1e6091);
+      color: white;
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    }
+    .hero h1 { margin: 0; font-size: 20px; }
+    .hero p { margin: 6px 0 0; font-size: 13px; opacity: 0.92; }
+
+    .panel {
+      margin-top: 16px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    @media (max-width: 900px) {
+      .input-grid { grid-template-columns: 1fr; }
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+    button[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+    .row2 {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 900px) {
+      .row2 { grid-template-columns: 1fr; }
+    }
+
+    .view-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      min-height: 320px;
+    }
+    .view-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    #preview2d {
+      width: 100%;
+      height: 280px;
+      border: 1px dashed #d7dce2;
+      border-radius: 8px;
+      background: #fff;
+    }
+    #preview3d {
+      width: 100%;
+      height: 280px;
+      border: 1px dashed #d7dce2;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      color: white;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .good { background: var(--good); }
+    .mid { background: var(--mid); }
+    .bad { background: var(--bad); }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.55;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .results-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 1100px) {
+      .results-grid { grid-template-columns: 1fr; }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+      padding: 8px 6px;
+    }
+    th { color: #475569; font-size: 12px; }
+    .mono { font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .mol-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .mol-card h4 {
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-bottom: 1px solid #eef2f7;
+      background: #f8fafc;
+    }
+    .mol3d {
+      width: 100%;
+      height: 200px;
+      border-bottom: 1px solid #eef2f7;
+    }
+    .props {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    .err {
+      margin-top: 10px;
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #9f1239;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div id="app" class="wrap">
+  <section class="hero">
+    <h1>Chemformer Retrosynthesis Demo</h1>
+    <p>Input SMILES, preview 2D/3D, estimate success probability, then run one-step retrosynthesis.</p>
+  </section>
+
+  <section class="panel">
+    <div class="input-grid">
+      <div>
+        <label>SMILES</label>
+        <input v-model="smiles" placeholder="e.g. CCN(CC)CCNC(=O)C1=CC(=C(C=C1OC)N)Cl" />
+      </div>
+      <div>
+        <label>Beam Size</label>
+        <select v-model.number="nBeams">
+          <option v-for="n in [3,5,8,10,12]" :key="n" :value="n">{{n}}</option>
+        </select>
+      </div>
+      <div>
+        <label>API Base URL</label>
+        <input v-model="apiBase" placeholder="https://your-space.hf.space" />
+      </div>
+      <div>
+        <button :disabled="loading" @click="runAll">{{loading ? 'Running...' : 'Preview + Run'}}</button>
+      </div>
+    </div>
+
+    <div v-if="estimate" style="margin-top: 12px;">
+      <span class="badge" :class="badgeClass(estimate.risk_level)">
+        {{estimate.risk_level.toUpperCase()}} / P={{estimate.probability}}
+      </span>
+      <strong>{{estimate.message}}</strong>
+      <div class="hint" v-if="estimate.reasons && estimate.reasons.length">
+        <div v-for="(r, i) in estimate.reasons" :key="i">- {{r}}</div>
+      </div>
+    </div>
+
+    <div class="row2" style="margin-top: 14px;">
+      <div class="view-card">
+        <div class="view-title">2D Preview</div>
+        <canvas id="preview2d"></canvas>
+      </div>
+      <div class="view-card">
+        <div class="view-title">3D Preview</div>
+        <div id="preview3d"></div>
+      </div>
+    </div>
+
+    <div v-if="error" class="err">{{error}}</div>
+  </section>
+
+  <section class="panel" v-if="rows.length">
+    <div class="view-title">Retrosynthesis Beams</div>
+    <div class="results-grid">
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th>Beam</th>
+              <th>Reactants</th>
+              <th>Log-Likelihood</th>
+              <th>Valid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in rows" :key="row.beam">
+              <td>{{row.beam}}</td>
+              <td class="mono">{{row.reactants_smiles}}</td>
+              <td>{{row.log_likelihood}}</td>
+              <td>{{row.valid_smiles ? 'Yes' : 'No'}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="cards">
+          <div class="mol-card" v-for="(c, i) in cards" :key="i">
+            <h4>{{c.name}}</h4>
+            <div class="mol3d" :id="'card3d-'+i"></div>
+            <div class="props">
+              <div><span class="mono">{{c.smiles}}</span></div>
+              <div>MW: {{c.descriptors.mw}} | logP: {{c.descriptors.logp}}</div>
+              <div>HBD/HBA: {{c.descriptors.hbd}} / {{c.descriptors.hba}}</div>
+              <div>TPSA: {{c.descriptors.tpsa}} | Rings: {{c.descriptors.rings}}</div>
+              <div>Energy: {{c.energy_kcal === null ? 'N/A' : c.energy_kcal + ' kcal/mol'}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const { createApp, nextTick } = Vue;
+
+createApp({
+  data() {
+    return {
+      smiles: 'CCN(CC)CCNC(=O)C1=CC(=C(C=C1OC)N)Cl',
+      nBeams: 5,
+      apiBase: 'https://your-space-name.hf.space',
+      loading: false,
+      error: '',
+      estimate: null,
+      rows: [],
+      cards: [],
+      previewViewer: null,
+      cardViewers: []
+    };
+  },
+  methods: {
+    badgeClass(level) {
+      if (level === 'high') return 'good';
+      if (level === 'medium') return 'mid';
+      return 'bad';
+    },
+
+    draw2D(smiles) {
+      const canvas = document.getElementById('preview2d');
+      const drawer = new SmilesDrawer.Drawer({
+        width: canvas.clientWidth || 500,
+        height: 280,
+        compactDrawing: false,
+        bondThickness: 1.2,
+        atomVisualization: 'default'
+      });
+      SmilesDrawer.parse(smiles, tree => {
+        drawer.draw(tree, 'preview2d', 'light', false);
+      }, err => {
+        console.error(err);
+      });
+    },
+
+    draw3DMolBlock(elId, molblock) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const viewer = $3Dmol.createViewer(el, { backgroundColor: 'white' });
+      if (molblock) {
+        viewer.addModel(molblock, 'mol');
+        viewer.setStyle({}, { stick: { radius: 0.14 }, sphere: { scale: 0.26 } });
+        viewer.zoomTo();
+        viewer.render();
+      }
+      return viewer;
+    },
+
+    async runAll() {
+      this.loading = true;
+      this.error = '';
+      this.rows = [];
+      this.cards = [];
+
+      try {
+        const base = this.apiBase.replace(/\/$/, '');
+
+        const p1 = await axios.post(base + '/preview', {
+          smiles: this.smiles
+        });
+
+        this.estimate = p1.data.success_estimate;
+        this.draw2D(p1.data.canonical_smiles || this.smiles);
+
+        if (this.previewViewer) {
+          try { this.previewViewer.clear(); } catch(e) {}
+        }
+        this.previewViewer = this.draw3DMolBlock('preview3d', p1.data.preview_3d_molblock);
+
+        const p2 = await axios.post(base + '/retrosynthesis', {
+          smiles: this.smiles,
+          n_beams: this.nBeams,
+          optimize_confs: 30
+        });
+
+        this.rows = p2.data.retrosynthesis.rows || [];
+        this.cards = p2.data.molecule_cards || [];
+
+        await nextTick();
+        this.cardViewers.forEach(v => {
+          try { v.clear(); } catch(e) {}
+        });
+        this.cardViewers = [];
+
+        this.cards.forEach((c, i) => {
+          const v = this.draw3DMolBlock('card3d-' + i, c.molblock_3d);
+          if (v) this.cardViewers.push(v);
+        });
+
+      } catch (e) {
+        const msg = e?.response?.data?.detail || e.message || 'Unknown error';
+        this.error = 'Request failed: ' + msg;
+      } finally {
+        this.loading = false;
+      }
+    }
+  },
+  mounted() {
+    this.draw2D(this.smiles);
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

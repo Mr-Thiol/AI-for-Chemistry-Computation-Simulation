@@ -1,0 +1,10 @@
+<!-- Put this file into your Hugo site: layouts/shortcodes/retrosyn.html -->
+<div style="width:100%;min-height:980px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.08)">
+  <iframe
+    src="{{ .Get \"src\" | default \"/retro/indole-retro-widget.html\" }}"
+    title="Chemformer Retrosynthesis Widget"
+    style="width:100%;height:980px;border:none"
+    loading="lazy"
+    referrerpolicy="no-referrer"
+  ></iframe>
+</div>

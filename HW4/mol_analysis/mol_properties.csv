@@ -1,0 +1,8 @@
+name,smiles,MW,logP,HBD,HBA,TPSA,RotBonds,Rings,n_confs_tried,n_confs_ok,MMFF94_energy_kcal
+Metoclopramide (Target),CCN(CC)CCNC(=O)c1cc(Cl)c(N)cc1OC,299.8,2.0,2,4,67.6,7,1,50,50,42.421
+Beam 1 / 反应物 1,CCN(CC)CCN,116.21,0.29,1,2,29.3,4,0,50,50,20.365
+Beam 1 / 反应物 2,COC(=O)c1cc(N)c(OC)cc1Cl,215.64,1.72,1,4,61.5,2,1,50,50,28.231
+Beam 2 / 反应物 2,CCOC(=O)c1cc(Cl)c(N)cc1OC,229.66,2.11,1,4,61.5,3,1,50,50,44.111
+Beam 3 / 反应物 2,COC(=O)c1c(N)cc(Cl)cc1OC,215.64,1.72,1,4,61.5,2,1,50,50,50.2
+Beam 4 / 反应物 2,COC(=O)c1cc(Cl)c(N)cc1OC,215.64,1.72,1,4,61.5,2,1,50,50,46.516
+Beam 5 / 反应物 1,COC(=O)C1=CC(=C(N)C=C(Cl)OC)C=C1OC,271.7,1.57,1,5,70.8,4,1,50,50,41.053

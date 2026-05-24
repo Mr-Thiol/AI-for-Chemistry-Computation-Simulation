@@ -237,7 +237,11 @@ class Chemformer:
             self.datamodule = datamodule
 
         self.datamodule.setup()
-        n_cpus = len(os.sched_getaffinity(0))
+        try:
+            n_cpus = len(os.sched_getaffinity(0))
+        except AttributeError:
+            import multiprocessing
+            n_cpus = multiprocessing.cpu_count()
         if self.n_gpus > 0:
             n_workers = n_cpus // self.n_gpus
         else:

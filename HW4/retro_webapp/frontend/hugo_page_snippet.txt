@@ -1,0 +1,6 @@
+Use in any Hugo markdown page:
+
+{{< retrosyn src="/retro/indole-retro-widget.html" >}}
+
+Recommended: put indole-retro-widget.html into Hugo static/retro/ directory.
+Then set apiBase in that file to your Hugging Face Space URL.

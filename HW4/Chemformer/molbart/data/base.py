@@ -123,7 +123,10 @@ class _AbsDataModule(pl.LightningDataModule):
         self.pin_memory = pin_memory
         self.unified_model = unified_model
 
-        self._num_workers = len(os.sched_getaffinity(0))
+        try:
+            self._num_workers = len(os.sched_getaffinity(0))
+        except AttributeError:
+            self._num_workers = 0  # Windows: use 0 to avoid DataLoader multiprocessing issues
 
         self.train_dataset = None
         self.val_dataset = None

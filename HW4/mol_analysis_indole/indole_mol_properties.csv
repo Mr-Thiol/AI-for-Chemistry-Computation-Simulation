@@ -1,0 +1,6 @@
+name,smiles,MW,logP,HBD,HBA,TPSA,RotBonds,Rings,AromaticRings,n_confs_ok,MMFF94_energy_kcal
+Indole (吲哚),c1ccc2[nH]ccc2c1,117.15,2.17,1,0,15.8,0,2,2,50,15.112
+Beam 1 / 反应物 1,Oc1ccc2[nH]ccc2c1,133.15,1.87,2,1,36.0,0,2,2,50,3.661
+Beam 3 / 反应物 1,Oc1ccc2ccccc2c1,144.17,2.55,1,1,20.2,0,2,2,50,19.234
+Beam 4 / 反应物 1,Oc1ccc2cc[nH]c2c1,133.15,1.87,2,1,36.0,0,2,2,50,4.008
+Beam 6 / 反应物 1,Clc1cc2ccccc2[nH]1,151.6,2.82,1,0,15.8,0,2,2,50,9.232

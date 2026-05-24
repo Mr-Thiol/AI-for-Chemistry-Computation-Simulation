@@ -1,0 +1,80 @@
+Chemformer -> Hugging Face Space (Docker) Deployment Steps
+
+A. Prerequisites
+1) You already created Space:
+   https://huggingface.co/spaces/MrThiol/chemformer
+2) Install git-lfs once on your machine.
+3) Prepare local paths below:
+   - E:\JupyterPjs\AI4Chem\HW4\retro_webapp\backend\app.py
+   - E:\JupyterPjs\AI4Chem\HW4\retro_webapp\backend\requirements.txt
+   - E:\JupyterPjs\AI4Chem\HW4\retro_webapp\backend\Dockerfile
+   - E:\JupyterPjs\AI4Chem\HW4\Chemformer\molbart\
+   - E:\JupyterPjs\AI4Chem\HW4\Chemformer\bart_vocab_downstream.json
+   - E:\JupyterPjs\AI4Chem\HW4\fine_tune_upsto_50_last_v2.ckpt
+   - E:\JupyterPjs\AI4Chem\HW4\USPTO-50K.csv
+
+B. Clone your Space repo
+Run in PowerShell:
+
+cd E:\JupyterPjs\AI4Chem
+
+git clone https://huggingface.co/spaces/MrThiol/chemformer
+
+cd .\chemformer
+
+C. Copy required files into Space root
+
+Copy-Item "E:\JupyterPjs\AI4Chem\HW4\retro_webapp\backend\app.py" .\app.py -Force
+Copy-Item "E:\JupyterPjs\AI4Chem\HW4\retro_webapp\backend\requirements.txt" .\requirements.txt -Force
+Copy-Item "E:\JupyterPjs\AI4Chem\HW4\retro_webapp\backend\Dockerfile" .\Dockerfile -Force
+
+New-Item -ItemType Directory -Force .\Chemformer | Out-Null
+Copy-Item "E:\JupyterPjs\AI4Chem\HW4\Chemformer\bart_vocab_downstream.json" .\Chemformer\bart_vocab_downstream.json -Force
+Copy-Item "E:\JupyterPjs\AI4Chem\HW4\Chemformer\molbart" .\Chemformer\molbart -Recurse -Force
+
+Copy-Item "E:\JupyterPjs\AI4Chem\HW4\fine_tune_upsto_50_last_v2.ckpt" .\fine_tune_upsto_50_last_v2.ckpt -Force
+Copy-Item "E:\JupyterPjs\AI4Chem\HW4\USPTO-50K.csv" .\USPTO-50K.csv -Force
+
+D. IMPORTANT: use Git LFS for checkpoint
+
+git lfs install
+git lfs track "*.ckpt"
+
+git add .gitattributes
+
+git add app.py requirements.txt Dockerfile
+
+git add Chemformer\molbart Chemformer\bart_vocab_downstream.json
+
+git add USPTO-50K.csv fine_tune_upsto_50_last_v2.ckpt
+
+git commit -m "Deploy Chemformer FastAPI backend"
+
+git push
+
+E. Wait for Space build
+1) Open your Space page and wait until build status becomes Running.
+2) Test endpoints:
+   - https://<your-space>.hf.space/health
+   - https://<your-space>.hf.space/example
+
+F. Connect to Hugo frontend
+1) Edit:
+   my-site\static\retro\config.js
+2) Replace apiBase with your real Space URL.
+3) Push my-site to GitHub.
+4) GitHub Actions renders Hugo, then open /chemformer page.
+
+G. Do I need API key?
+1) Public Space + open endpoints: NO API key needed.
+2) Private Space: needs token/proxy; not recommended for direct browser call.
+
+H. Common failures
+1) Build fails with missing molbart:
+   - Check Chemformer\molbart exists in Space repo.
+2) Build fails with model file issue:
+   - Ensure ckpt is tracked by git-lfs and fully uploaded.
+3) 404 from frontend:
+   - Check config.js apiBase value and trailing slash.
+4) Browser CORS issue:
+   - Current app.py allows all origins; redeploy if changed.
