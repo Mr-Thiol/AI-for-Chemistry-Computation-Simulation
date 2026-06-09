@@ -1,0 +1,11 @@
+potential gpunn gpud3
+GPUNN.model_name new_general_model.pth
+
+SSW.Safe_hardcurv 999999
+explore_type NVT
+MD.ttotal 5000
+MD.dt 1
+MD.initial_T 300
+MD.Target_T 300
+MD.nhmass 66
+GPUNN.model_name new_general_model.pth
