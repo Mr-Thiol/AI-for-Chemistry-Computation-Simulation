@@ -1,0 +1,19 @@
+potential GPUNN GPUD3
+explore_type NPT 
+
+MD.dt 1.0
+MD.print_freq 100
+MD.print_strfreq 100
+MD.target_P 0.0001
+MD.nhmass 1000
+MD.prmass 1000
+MD.realmass .true.
+
+# --- 注意这里的反转 ---
+MD.initial_T 1500        # 从高温液态开始
+MD.target_T 600          # 降回低温固态
+MD.changeT_stepsize 150  # 保持快扫阶梯
+MD.changeT_timestep 10000 # 保持快扫弛豫时间
+
+MD.ttotal 80000 
+GPUNN.model_name new_general_model.pth

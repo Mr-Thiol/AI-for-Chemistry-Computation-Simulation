@@ -1,0 +1,21 @@
+potential GPUNN GPUD3
+explore_type NPT 
+
+# --- 基础控制参数 ---
+MD.dt 1.0
+MD.print_freq 100
+MD.print_strfreq 100
+MD.target_P 0.0001
+MD.nhmass 1000
+MD.prmass 1000
+MD.realmass .true.
+
+# --- 核心变温参数（提速关键） ---
+MD.initial_T 600
+MD.target_T 1500
+MD.changeT_stepsize 150    # 【修改】从原来的100扩大到150，减少升温阶梯数量
+MD.changeT_timestep 10000  # 【修改】从原来的20000缩减到10000，减少每个温度点的平衡时间
+
+# --- 总时长控制 ---
+MD.ttotal 80000            # 【修改】大幅缩减总步数 
+GPUNN.model_name new_general_model.pth

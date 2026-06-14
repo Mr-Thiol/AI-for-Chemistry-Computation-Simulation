@@ -1,0 +1,18 @@
+# LASP标准NPT参数
+potential GPUNN GPUD3
+explore_type NPT # NVT系综; NVE系综; NPT系综
+
+MD.dt 1.0 #fs
+MD.ttotal 400000 #fs
+MD.target_P 0.0001 #GPa
+MD.target_T 1500 #K
+MD.initial_T 300 #K
+MD.changeT_timestep 20000
+MD.changeT_stepsize 100
+MD.nhmass 1000
+MD.prmass 1000
+MD.print_freq 100
+MD.print_strfreq 100
+MD.realmass .true.
+ 
+GPUNN.model_name new_general_model.pth
