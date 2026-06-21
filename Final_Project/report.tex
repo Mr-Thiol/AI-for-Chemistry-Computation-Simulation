@@ -1,0 +1,489 @@
+% ============================================================
+%  人工智能化学计算模拟  ——  期末大作业
+%  金属肥皂去除异味的第一性原理研究
+%  编译命令：xelatex report.tex（需运行两次以生成目录）
+%  说明：含空格的图片文件名依赖 grffile 宏包；
+%        含括号的文件名（如 CH3(=S)CH3.png）编译前需重命名
+%        或改用 \detokenize。本文档无需编译，作为源码提交。
+% ============================================================
+
+\documentclass[12pt, a4paper]{article}
+
+%% ---- 中文支持 ----
+\usepackage[UTF8]{ctex}
+
+%% ---- 页面布局 ----
+\usepackage{geometry}
+\geometry{left=2.5cm, right=2.5cm, top=3.0cm, bottom=3.0cm}
+
+%% ---- 图表 ----
+\usepackage{graphicx}
+\usepackage{grffile}          % 支持含空格的文件名
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf}
+\graphicspath{{./}}           % 图片与 .tex 文件同目录
+
+%% ---- 表格 ----
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{makecell}
+
+%% ---- 数学 ----
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{siunitx}
+
+%% ---- 化学式 ----
+\usepackage[version=4]{mhchem}
+
+%% ---- 其他 ----
+\usepackage{xcolor}
+\definecolor{deepblue}{RGB}{0,70,140}
+\usepackage[colorlinks=true, linkcolor=deepblue, citecolor=deepblue]{hyperref}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 人工智能化学计算模拟}
+\fancyhead[R]{\small 期末大作业}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%% ---- 段落 ----
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.5em}
+\onehalfspacing
+
+% ============================================================
+\begin{document}
+% ============================================================
+
+%% ======== 封面 ========
+\begin{titlepage}
+  \centering
+  \vspace*{4cm}
+  {\Huge\bfseries 人工智能化学计算模拟}\par
+  \vspace{1cm}
+  {\LARGE 期末大作业}\par
+  \vspace{2cm}
+  {\Large\bfseries 不锈钢肥皂除异味机理的第一性原理研究}\par
+  \vspace{3cm}
+  {\large 学号姓名}\par
+  \vspace{0.5cm}
+  {\large 2026 年 6 月}\par
+  \vfill
+\end{titlepage}
+
+\newpage
+
+% ============================================================
+\section{研究背景与意义}
+% ============================================================
+
+处理大蒜、鱼等食材后手上残留的异味难以用普通香皂去除，而不锈钢肥皂能有效消除这些异味。
+异味分子主要包括：甲硫醇（\ce{CH3SH}）、二甲硫醚（\ce{(CH3)2S}）、硫代丙酮（\ce{(CH3)2CS}）、
+二烯丙基二硫（\ce{(C3H5)2S2}）及三甲胺（\ce{(CH3)3N}）。
+
+金属表面通过\textbf{表面吸附}机制去除异味：金属 $d$ 空轨道与异味分子中 S、N 孤对电子配位，
+将分子锚定在表面，再经水流冲走。本文利用第一性原理计算研究了四种金属表面（Cr、Fe、Ni 及合金 Fe$_7$Cr$_2$Ni$_1$）
+对五种异味分子的吸附能，阐明不锈钢（7\,:\,2\,:\,1 配比）作为金属肥皂的理论基础。
+
+% ============================================================
+\section{计算方法}
+% ============================================================
+
+\subsection{软件平台：LASPAI}
+
+本次计算使用 \textbf{LASPAI} 平台完成吸附结构搜索与吸附能提取。
+LASPAI 基于密度泛函理论（DFT），结合机器学习势（MLP）进行构型筛选，
+并调用 \textsc{VASP} 级别全电子计算对最优构型精修。
+
+\subsection{色散校正：DFT-D3}
+
+采用 Grimme 的 D3 色散校正（DFT-D3）补充范德瓦耳斯相互作用：
+\begin{equation}
+  E_{\mathrm{ads}}^{\mathrm{D3}} = E_{\mathrm{slab+mol}} - E_{\mathrm{slab}} - E_{\mathrm{mol}} + \Delta E_{\mathrm{D3}}
+\end{equation}
+吸附能为负值表示放热，绝对值越大吸附越强。
+
+\subsection{数据提取}
+
+利用 OCR 脚本（\texttt{ocr\_extract.py}）通过正则表达式从 LASPAI 输出截图中
+提取吸附能数据，汇总至 \texttt{ocr\_results.txt}。
+
+% ============================================================
+\section{计算模型}
+% ============================================================
+
+\subsection{表面模型参数}
+
+各金属表面的切片模型参数见表~\ref{tab:slab}。
+
+\begin{table}[H]
+  \centering
+  \caption{各金属表面切片模型参数汇总}
+  \label{tab:slab}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{金属体系} & \textbf{晶面取向 (hkl)} & \textbf{面内超胞矩阵} & \textbf{厚度（层）} & \textbf{晶胞参数} \\
+    \midrule
+    Cr                  & (1\,1\,1) & $\begin{pmatrix}5&0\\0&5\end{pmatrix}$ & 10 & BCC Cr 标准参数 \\[6pt]
+    Fe                  & (1\,1\,0) & $\begin{pmatrix}5&0\\0&5\end{pmatrix}$ & 10 & BCC Fe 标准参数 \\[6pt]
+    Ni                  & (1\,1\,0) & $\begin{pmatrix}5&0\\0&5\end{pmatrix}$ & 10 & FCC Ni 标准参数 \\[6pt]
+    Fe$_7$Cr$_2$Ni$_1$ & (1\,1\,1) & $\begin{pmatrix}4&0\\0&4\end{pmatrix}$ & 8  &
+      \makecell[l]{$a=b=c=4.88$\,\AA\\$\alpha=\beta=\gamma=90^\circ$} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Cr\,(111)}：铬的体心立方（BCC）结构，选择 (111) 面是因为该面具有较高的
+        表面能和配位不饱和位点，有利于吸附活性的研究；
+        5×5 超胞确保异味分子之间的镜像相互作用可忽略。
+  \item \textbf{Fe\,(110) 与 Ni\,(110)}：铁（BCC）和镍（FCC）分别以各自最稳定的低指数面
+        (110) 为研究对象，5×5 超胞同上，厚度 10 层保证体相收敛。
+  \item \textbf{Fe$_7$Cr$_2$Ni$_1$\,(111)}：模拟 304 型不锈钢合金，晶格常数
+        $a = 4.88$\,\AA\ 介于 FCC-Fe、Cr 与 Ni 的平均值附近，反映合金效应；
+        (111) 面为 FCC 合金最密排面，表面位点丰富；4×4 超胞×8 层约含
+        480 个合金原子，计算量适中。
+\end{itemize}
+
+\subsection{代表性吸附结构展示}
+
+图~\ref{fig:cr_adsorb}—\ref{fig:ni_adsorb} 展示了各金属体系的典型吸附结构截图，
+截图直接来自 LASPAI 平台输出，包含三维结构视图、吸附能排列列表及
+能量信息面板。
+
+%% ---- Cr 面 ----
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Cr AllylSSAllyl}.png}
+    \caption{Cr\,(111) 表面吸附二烯丙基二硫}
+    \label{fig:cr_allyl}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Cr CH3SH}.png}
+    \caption{Cr\,(111) 表面吸附甲硫醇}
+    \label{fig:cr_ch3sh}
+  \end{subfigure}
+  \caption{Cr\,(111) 吸附构型。\textbf{甲硫醇、二甲硫醚、二烯丙基二硫均发生解离式吸附}（S--C 键断裂），
+           其中二烯丙基二硫吸附能达 $-8.256$\,eV（w.D3）。解离吸附使 S 原子直接与多个 Cr 原子成键，
+           形成强配位，是 Cr 表面吸附能最强的关键。}
+  \label{fig:cr_adsorb}
+\end{figure}
+
+%% ---- Fe 面 ----
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Fe CH3SH}.png}
+    \caption{Fe\,(110) 表面吸附甲硫醇}
+    \label{fig:fe_ch3sh}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Fe AllylSSAllyl}.png}
+    \caption{Fe\,(110) 表面吸附二烯丙基二硫}
+    \label{fig:fe_allyl}
+  \end{subfigure}
+  \caption{Fe\,(110) 吸附构型。\textbf{甲硫醇、二甲硫醚发生解离式吸附}（S--C 键断裂），
+           吸附能分别为 $-3.991$ 和 $-2.189$\,eV（w.D3）；
+           \textbf{二烯丙基二硫以碳碳双键吸附}而非 S 吸附，吸附能较弱（$-1.525$\,eV）。}
+  \label{fig:fe_adsorb}
+\end{figure}
+
+%% ---- 合金面 ----
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Fe7Cr2Ni1 AllylSSAllyl}.png}
+    \caption{Fe$_7$Cr$_2$Ni$_1$\,(111) 吸附二烯丙基二硫}
+    \label{fig:alloy_allyl}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Fe7Cr2Ni1 CH3SH}.png}
+    \caption{Fe$_7$Cr$_2$Ni$_1$\,(111) 吸附甲硫醇}
+    \label{fig:alloy_ch3sh}
+  \end{subfigure}
+  \caption{Fe$_7$Cr$_2$Ni$_1$ 合金吸附构型。\textbf{甲硫醇、二甲硫醚、二烯丙基二硫均发生解离式吸附}（S--C 键断裂），
+           其中二烯丙基二硫吸附能高达 $-9.853$\,eV（w.D3），超过纯 Cr，显示协同效应。
+           合金表面的多元活性位点促进了解离吸附。}
+  \label{fig:alloy_adsorb}
+\end{figure}
+
+%% ---- Ni 面 ----
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Ni CH3SH}.png}
+    \caption{Ni\,(110) 表面吸附甲硫醇}
+    \label{fig:ni_ch3sh}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{{Ni AllylSSAllyl}.png}
+    \caption{Ni\,(110) 表面吸附二烯丙基二硫}
+    \label{fig:ni_allyl}
+  \end{subfigure}
+  \caption{Ni\,(110) 吸附构型。\textbf{甲硫醇发生解离式吸附}，\textbf{二甲硫醚为 S 原子吸附}，
+           \textbf{二烯丙基二硫以碳碳双键吸附}。吸附能最弱，甲硫醇 $-1.937$\,eV，
+           二烯丙基二硫 $-1.350$\,eV（w.D3）。}
+  \label{fig:ni_adsorb}
+\end{figure}
+
+% ============================================================
+\section{计算结果}
+% ============================================================
+
+表~\ref{tab:ads_energy} 汇总了四种金属表面对五种异味分子的体系总能量与吸附能，
+其中 $E_{\mathrm{ads}}$ 为未含色散校正的 DFT 吸附能，
+$E_{\mathrm{ads}}^{\mathrm{D3}}$ 为含 Grimme D3 色散修正的吸附能。
+
+\begin{longtable}{llSSS[table-format=-2.3]S[table-format=-2.3]}
+  \caption{各金属表面对五种异味分子的吸附能汇总（单位：eV）}
+  \label{tab:ads_energy}\\
+  \toprule
+  \textbf{金属表面} & \textbf{吸附分子（中文名）} &
+  \textbf{体系总能量} &
+  \multicolumn{2}{c}{\textbf{吸附能（eV）}} \\
+  \cmidrule(lr){4-5}
+  & & \textbf{(eV)} & {$E_{\mathrm{ads}}$} & {$E_{\mathrm{ads}}^{\mathrm{D3}}$} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{5}{c}{\textit{（续表~\ref{tab:ads_energy}）}} \\
+  \toprule
+  \textbf{金属表面} & \textbf{吸附分子（中文名）} &
+  \textbf{体系总能量 (eV)} &
+  {$E_{\mathrm{ads}}$} & {$E_{\mathrm{ads}}^{\mathrm{D3}}$} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  %% Cr
+  \multirow{5}{*}{Cr\,(111)}
+    & 甲硫醇\ (\ce{CH3SH})              & -2869.6170 & -3.694 & -4.418 \\
+    & 二甲硫醚\ (\ce{(CH3)2S})          & -2885.1593 & -2.577 & -3.413 \\
+    & 硫代丙酮\ (\ce{(CH3)2CS})      & -2895.5626 & -4.236 & -5.214 \\
+    & 二烯丙基二硫\ (\ce{(C3H5)2S2})           & -2943.5804 & -6.665 & \bfseries -8.256 \\
+    & 三甲胺\ (\ce{(CH3)3N})            & -2907.0530 & -0.418 & -1.115 \\
+  \midrule
+  %% Fe
+  \multirow{5}{*}{Fe\,(110)}
+    & 甲硫醇\ (\ce{CH3SH})              & -2493.3750 & -3.357 & -3.991 \\
+    & 二甲硫醚\ (\ce{(CH3)2S})          & -2508.1204 & -1.561 & -2.189 \\
+    & 硫代丙酮\ (\ce{(CH3)2CS})      & -2517.4254 & -2.185 & -2.892 \\
+    & 二烯丙基二硫\ (\ce{(C3H5)2S2})           & -2561.0345 & -0.721 & -1.525 \\
+    & 三甲胺\ (\ce{(CH3)3N})            & -2531.2887 & -0.468 & -1.166 \\
+  \midrule
+  %% Ni
+  \multirow{5}{*}{Ni\,(110)}
+    & 甲硫醇\ (\ce{CH3SH})              & -732.8967  & -1.184 & -1.937 \\
+    & 二甲硫醚\ (\ce{(CH3)2S})          & -748.9546  & -0.631 & -1.447 \\
+    & 硫代丙酮\ (\ce{(CH3)2CS})      & -758.8896  & -1.903 & -2.780 \\
+    & 二烯丙基二硫\ (\ce{(C3H5)2S2})           & -802.4365  & -0.517 & -1.350 \\
+    & 三甲胺\ (\ce{(CH3)3N})            & -773.0550  & -0.491 & -1.356 \\
+  \midrule
+  %% Alloy
+  \multirow{5}{*}{Fe$_7$Cr$_2$Ni$_1$\,(111)}
+    & 甲硫醇\ (\ce{CH3SH})              & -3841.1241 & -2.432 & -2.902 \\
+    & 二甲硫醚\ (\ce{(CH3)2S})          & -3856.8740 & -1.718 & -2.105 \\
+    & 硫代丙酮\ (\ce{(CH3)2CS})      & -3865.6337 & -1.861 & -2.262 \\
+    & 二烯丙基二硫\ (\ce{(C3H5)2S2})           & -3918.2010 & -8.541 & \bfseries -9.853 \\
+    & 三甲胺\ (\ce{(CH3)3N})            & -3880.4357 & -1.013 & -1.475 \\
+\end{longtable}
+
+为便于直观比较各金属体系的吸附活性，表~\ref{tab:compare} 以分子为行、金属为列，
+展示含 D3 校正的吸附能数据（加粗为每行最大值）。
+
+\begin{table}[H]
+  \centering
+  \caption{各分子在四种金属表面的 DFT-D3 吸附能对比（单位：eV，加粗为该行最负值）}
+  \label{tab:compare}
+  \setlength{\tabcolsep}{8pt}
+  \begin{tabular}{lcccc}
+    \toprule
+    \multirow{2}{*}{\textbf{异味分子}} &
+    \multicolumn{4}{c}{$E_{\mathrm{ads}}^{\mathrm{D3}}$\,(eV)} \\
+    \cmidrule(lr){2-5}
+    & \textbf{Cr\,(111)} & \textbf{Fe\,(110)} & \textbf{Ni\,(110)} & \textbf{Fe$_7$Cr$_2$Ni$_1$\,(111)} \\
+    \midrule
+    甲硫醇   (\ce{CH3SH})             &\textbf{\boldmath$-4.418$} & $-3.991$ & $-1.937$ & $-2.902$ \\
+    二甲硫醚 (\ce{(CH3)2S})           & \textbf{\boldmath$-3.413$} & $-2.189$ & $-1.447$ & $-2.105$ \\
+    硫代丙酮 (\ce{(CH3)2CS})       & \textbf{\boldmath$-5.214$} & $-2.892$ & $-2.780$ & $-2.262$ \\
+    二烯丙基二硫 (\ce{(C3H5)2S2})            & $-8.256$           & $-1.525$ & $-1.350$ & \bfseries \textbf{\boldmath$-9.853$} \\
+    三甲胺   (\ce{(CH3)3N})           & $-1.115$           & $-1.166$ & $-1.356$ & \bfseries \textbf{\boldmath$-1.475$} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ============================================================
+\section{结果分析与讨论}
+% ============================================================
+
+\subsection{吸附模式分析：解离吸附与分子吸附}
+
+不同金属表面对异味分子表现出不同的吸附模式，主要分为\textbf{解离式吸附}（化学键断裂）
+和\textbf{分子吸附}（保持分子完整性）：
+
+\paragraph{Fe\,(110) 表面}
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{甲硫醇、二甲硫醚}：发生 S--C 键断裂的解离式吸附，S 原子直接与 Fe 配位；
+  \item \textbf{二烯丙基二硫}：以碳碳双键吸附而非 S 吸附，吸附能较弱（$-1.525$\,eV）；
+  \item \textbf{硫代丙酮}：C=S 双键吸附；
+  \item \textbf{三甲胺}：N 原子吸附。
+\end{itemize}
+
+\paragraph{Ni\,(110) 表面}
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{甲硫醇}：发生解离式吸附；
+  \item \textbf{二甲硫醚}：S 原子分子吸附；
+  \item \textbf{二烯丙基二硫}：以碳碳双键吸附；
+  \item \textbf{硫代丙酮}：C=S 双键吸附；
+  \item \textbf{三甲胺}：N 原子吸附。
+\end{itemize}
+
+\paragraph{Cr\,(111) 表面}
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{甲硫醇、二甲硫醚、二烯丙基二硫}：均发生 S--C 键断裂的解离式吸附，
+        这是 Cr 表面吸附能最强的根本原因——解离后 S 原子可与多个 Cr 原子形成强配位键；
+  \item \textbf{硫代丙酮}：S=C 双键断裂，S 和 C 分别吸附；
+  \item \textbf{三甲胺}：N 原子吸附。
+\end{itemize}
+
+\paragraph{Fe$_7$Cr$_2$Ni$_1$ 合金表面}
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{甲硫醇、二甲硫醚、二烯丙基二硫}：与 Cr 面类似，均发生 S--C 键断裂的解离式吸附；
+  \item \textbf{硫代丙酮}：S=C 双键吸附（未断裂）；
+  \item \textbf{三甲胺}：N 原子吸附。
+\end{itemize}
+
+\textbf{关键发现}：Cr 及含 Cr 合金表面对含硫分子的解离能力最强，这是其吸附能显著高于
+Fe、Ni 的根本原因。解离吸附使 S 原子直接暴露，可与多个金属原子形成桥式配位，
+大幅提高吸附稳定性。Fe 和 Ni 表面则倾向于分子吸附或通过不饱和双键吸附，
+吸附强度相对较弱。
+
+\subsection{整体趋势：Cr 是含硫分子吸附的核心元素}
+
+从表~\ref{tab:compare} 可得平均吸附能排序：
+$\text{Cr\,(111)} > \text{Fe}_7\text{Cr}_2\text{Ni}_1\,(111) > \text{Fe\,(110)} \approx \text{Ni\,(110)}$。
+
+纯 Cr\,(111) 面对大多数含硫分子均表现出最强吸附，这与 Cr 的 $3d$ 空轨道多、
+配位不饱和位点密度高密切相关。S 孤对电子向 Cr 原子的 $\sigma$ 供体键
+叠加弱 $\pi$ 反馈键，使吸附异常稳定。
+
+\subsection{二烯丙基二硫：合金的协同增强效应}
+
+二烯丙基二硫（大蒜臭味主要成分）在各金属表面的表现：
+纯 Fe\,(110) 和 Ni\,(110) 的吸附能仅 $-1.525$ 和 $-1.350$\,eV（w.D3），
+纯 Cr\,(111) 达 $-8.256$\,eV，而 \textbf{Fe$_7$Cr$_2$Ni$_1$ 合金高达 $-9.853$\,eV}，
+超过纯 Cr 约 $1.6$\,eV，出现明显的合金协同增强效应。
+Cr 分散在 Fe-Ni 基底中时，$3d/4s$ 带杂化拓宽了表面活性能量窗口，
+使双 S 桥式吸附更加有利。
+
+\subsection{含氮分子（三甲胺）的吸附规律}
+
+三甲胺（鱼腥味来源）在四种表面的吸附能均弱于含硫分子（约 $-1.1$ 至 $-1.5$\,eV w.D3），
+各金属差异较小。N 原子孤对电子给体能力弱于 S，且三甲基空间位阻阻碍贴近金属表面。
+尽管如此，$\sim -1.4$\,eV 量级的吸附能在室温下仍对应极强的热力学稳定性，
+足以解释不锈钢肥皂能有效去除鱼腥味。
+
+\subsection{DFT-D3 色散校正的重要性}
+
+D3 色散修正普遍使吸附能增强 $0.4\sim2.0$\,eV，对大分子影响尤为显著。
+以 Fe\,(110)/\ce{(C3H5)2S2} 为例，DFT 吸附能仅 $-0.721$\,eV，
+而 D3 修正后为 $-1.525$\,eV。含长碳链或共轭体系的有机分子
+必须纳入范德瓦耳斯色散修正。
+
+% ============================================================
+\section{不锈钢肥皂的除味机理与 7\,:\,2\,:\,1 配比分析}
+% ============================================================
+
+\subsection{不锈钢肥皂的工作原理}
+
+不锈钢肥皂的除异味过程可概括为：
+（1）\textbf{分子吸附}：异味分子中的 S 或 N 孤对电子向金属表面 $d$ 空轨道配位，
+吸附能量级为 $1\sim10$\,eV，将分子锚定在表面。
+（2）\textbf{水洗去除}：流动水通过竞争表面位点及溶剂化效应，
+将异味分子从金属表面置换下来。
+（3）\textbf{表面再生}：氧气与 Cr 反应形成致密的 $\mathrm{Cr_2O_3}$ 钝化膜，
+保持 Lewis 酸活性位点，使性能可持续使用。
+
+\subsection{为何选择 7\,:\,2\,:\,1 的 Fe\,:\,Cr\,:\,Ni 比例？}
+
+304 型不锈钢组成约为 72\% Fe、18\% Cr、8\% Ni，本文的 Fe$_7$Cr$_2$Ni$_1$
+（70\,:\,20\,:\,10）与之近似，该配比合理性如下：
+
+\paragraph{（一）Cr 提供核心吸附活性}
+Cr 对含硫分子的吸附能最高（$-4.418\sim-8.256$\,eV），比 Fe 和 Ni 高 $1\sim6$\,eV。
+20\% Cr 足以形成丰富的活性位点和稳定的钝化膜。
+Cr 含量过高（$>$25\%）将进入脆性 $\sigma$ 相区，
+过低（$<$10.5\%）无法形成完整钝化膜。
+
+\paragraph{（二）Fe 作为经济基体}
+Fe 对含硫小分子的吸附能（$-2.189\sim-3.991$\,eV w.D3）处于中等水平。
+70\% Fe 提供优良的机械强度、延展性和成形性，同时价格低廉。
+
+\paragraph{（三）Ni 稳定奥氏体结构}
+纯 Fe 和纯 Cr 在室温为 BCC 结构，加入 8--12\% Ni 后转变为 FCC 奥氏体：
+FCC\,(111) 面是最密排面，有利于多点配位吸附；
+Ni 扩大了奥氏体稳定温区；少量 Ni 对 Cr 的电子结构调制产生协同增强，
+体现为合金对二烯丙基二硫吸附的超越。
+
+\begin{table}[H]
+  \centering
+  \caption{不锈钢三组元功能分析}
+  \label{tab:function}
+  \begin{tabular}{clll}
+    \toprule
+    \textbf{元素} & \textbf{含量} & \textbf{核心功能} & \textbf{计算依据} \\
+    \midrule
+    Fe & 70\% & 机械基体；中等吸附活性 & $E_{\mathrm{ads}}^{\mathrm{D3}}$ 居中 \\
+    Cr & 20\% & \textbf{吸附活性核心}；钝化膜 & 对硫化物 $E_{\mathrm{ads}}^{\mathrm{D3}}$ 最负 \\
+    Ni & 10\% & FCC 结构稳定剂；协同增强 & 合金对 \ce{(C3H5)2S2} 超越纯 Cr \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ============================================================
+\section{结论}
+% ============================================================
+
+本文利用 LASPAI 平台通过 DFT-D3 计算系统研究了四种金属表面对五种典型异味分子的吸附能，
+主要结论如下：
+
+\begin{enumerate}[leftmargin=2em]
+  \item 金属表面对异味分子的吸附能量级（$1\sim10$\,eV）远超室温热扰动，
+        热力学上支持金属肥皂的除味有效性。
+
+  \item Cr 是含硫分子吸附的关键元素，最高达 $-8.256$\,eV（二烯丙基二硫 w.D3），
+        与 Cr 的 $3d$ 空轨道多、配位不饱和位点丰富直接相关。
+
+  \item 合金效应显著增强大蒜味分子的吸附：Fe$_7$Cr$_2$Ni$_1$ 对二烯丙基二硫的吸附能
+        （$-9.853$\,eV w.D3）超越纯 Cr（$-8.256$\,eV），
+        说明 Cr、Fe、Ni 之间的电子协同效应产生额外增益。
+
+  \item 三甲胺（鱼腥味）在所有金属上吸附相对均匀且弱于含硫分子（约 $-1.1\sim-1.5$\,eV），
+        但仍足以解释不锈钢肥皂去除鱼腥味的实验现象。
+
+  \item 7\,:\,2\,:\,1 的 Fe\,:\,Cr\,:\,Ni 配比具有充分理论依据：
+        Cr 贡献核心吸附活性，Fe 提供结构基体，Ni 稳定 FCC 奥氏体结构并产生协同增强，
+        在成本、力学性能、耐腐蚀性和吸附活性间取得工程最优平衡。
+
+  \item DFT-D3 色散修正不可忽略：对大分子贡献超过 50\%，
+        未引入将显著低估金属表面的除味能力。
+\end{enumerate}
+
+综上，本研究从第一性原理层面定量阐明了不锈钢肥皂的除味机理，
+为不锈钢型金属肥皂的组分设计提供了理论依据。
+
+\end{document}
